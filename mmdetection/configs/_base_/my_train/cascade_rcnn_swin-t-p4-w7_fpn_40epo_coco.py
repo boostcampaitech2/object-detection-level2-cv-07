@@ -30,7 +30,8 @@ optimizer = dict(
     _delete_=True,
     type='AdamW',
     lr=0.0001,
-    betas=(0.9, 0.999),
+    #betas=(0.9, 0.999),
+    momentum = 0.9,
     weight_decay=0.05,
     paramwise_cfg=dict(
         custom_keys={
@@ -40,3 +41,5 @@ optimizer = dict(
         }))
 lr_config = dict(warmup_iters=1000, step=[8, 11])
 runner = dict(max_epochs=14)
+
+#dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
