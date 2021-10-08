@@ -1,0 +1,343 @@
+diff --git a/mmdetection/configs/_base_/default_runtime.py b/mmdetection/configs/_base_/default_runtime.py
+index 55097c5..8ecf140 100644
+--- a/mmdetection/configs/_base_/default_runtime.py
++++ b/mmdetection/configs/_base_/default_runtime.py
+@@ -5,6 +5,10 @@ log_config = dict(
+     hooks=[
+         dict(type='TextLoggerHook'),
+         # dict(type='TensorboardLoggerHook')
++        dict(type='WandbLoggerHook',
++        init_kwargs=dict(
++            project='Swin',
++            name='Effdet_Adam_1024'))
+     ])
+ # yapf:enable
+ custom_hooks = [dict(type='NumClassCheckHook')]
+diff --git a/mmdetection/faster_rcnn_train_cascade_swin.ipynb b/mmdetection/faster_rcnn_train_cascade_swin.ipynb
+index bd3145c..adf880f 100644
+--- a/mmdetection/faster_rcnn_train_cascade_swin.ipynb
++++ b/mmdetection/faster_rcnn_train_cascade_swin.ipynb
+@@ -2,18 +2,44 @@
+  "cells": [
+   {
+    "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
++   "execution_count": 1,
+    "source": [
+     "# !pip install --ignore-installed mmcv-full==1.3.14 -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html"
+-   ]
++   ],
++   "outputs": [
++    {
++     "output_type": "stream",
++     "name": "stdout",
++     "text": [
++      "Looking in links: https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html\n",
++      "Collecting mmcv-full==1.3.14\n",
++      "  Using cached https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/mmcv_full-1.3.14-cp37-cp37m-manylinux1_x86_64.whl (33.2 MB)\n",
++      "Collecting pyyaml\n",
++      "  Using cached PyYAML-5.4.1-cp37-cp37m-manylinux1_x86_64.whl (636 kB)\n",
++      "Collecting yapf\n",
++      "  Using cached yapf-0.31.0-py2.py3-none-any.whl (185 kB)\n",
++      "Collecting Pillow\n",
++      "  Using cached Pillow-8.3.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.0 MB)\n",
++      "Collecting opencv-python>=3\n",
++      "  Using cached opencv_python-4.5.3.56-cp37-cp37m-manylinux2014_x86_64.whl (49.9 MB)\n",
++      "Collecting numpy\n",
++      "  Using cached numpy-1.21.2-cp37-cp37m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (15.7 MB)\n",
++      "Collecting packaging\n",
++      "  Using cached packaging-21.0-py3-none-any.whl (40 kB)\n",
++      "Collecting addict\n",
++      "  Using cached addict-2.4.0-py3-none-any.whl (3.8 kB)\n",
++      "Collecting pyparsing>=2.0.2\n",
++      "  Using cached pyparsing-2.4.7-py2.py3-none-any.whl (67 kB)\n",
++      "Installing collected packages: pyparsing, numpy, yapf, pyyaml, Pillow, packaging, opencv-python, addict, mmcv-full\n",
++      "Successfully installed Pillow-8.3.2 addict-2.4.0 mmcv-full-1.3.14 numpy-1.21.2 opencv-python-4.5.3.56 packaging-21.0 pyparsing-2.4.7 pyyaml-5.4.1 yapf-0.31.0\n"
++     ]
++    }
++   ],
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 1,
+-   "metadata": {},
+-   "outputs": [],
+    "source": [
+     "# 모듈 import\n",
+     "\n",
+@@ -23,13 +49,13 @@
+     "from mmdet.apis import train_detector\n",
+     "from mmdet.datasets import (build_dataloader, build_dataset,\n",
+     "                            replace_ImageToTensor)"
+-   ]
++   ],
++   "outputs": [],
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 2,
+-   "metadata": {},
+-   "outputs": [],
+    "source": [
+     "classes = (\"General trash\", \"Paper\", \"Paper pack\", \"Metal\", \"Glass\", \n",
+     "           \"Plastic\", \"Styrofoam\", \"Plastic bag\", \"Battery\", \"Clothing\")\n",
+@@ -37,24 +63,24 @@
+     "# config file 들고오기\n",
+     "cfg = Config.fromfile('./configs/_base_/my_train/cascade_rcnn_swin-t-p4-w7_fpn_40epo_coco.py')\n",
+     "\n",
+-    "# root='../dataset/'\n",
++    "root='../dataset/'\n",
+     "\n",
+-    "# dataset config 수정\n",
+-    "# cfg.optimizer.type='Adam'\n",
+-    "# cfg.optimizer.lr=0.00001\n",
+-    "# del(cfg.optimizer.momentum)\n",
++    "dataset config 수정\n",
++    "cfg.optimizer.type='Adam'\n",
++    "cfg.optimizer.lr=0.00001\n",
++    "del(cfg.optimizer.momentum)\n",
+     "\n",
+-    "# cfg.data.train.classes = classes\n",
+-    "# cfg.data.train.img_prefix = root\n",
+-    "# cfg.data.train.ann_file = root + 'train.json' # train json 정보\n",
+-    "# cfg.data.train.pipeline[2]['img_scale'] = (512,512) # Resize\n",
++    "cfg.data.train.classes = classes\n",
++    "cfg.data.train.img_prefix = root\n",
++    "cfg.data.train.ann_file = root + 'train.json' # train json 정보\n",
++    "cfg.data.train.pipeline[2]['img_scale'] = (1024,1024) # Resize\n",
+     "\n",
+-    "# cfg.data.test.classes = classes\n",
+-    "# cfg.data.test.img_prefix = root\n",
+-    "# cfg.data.test.ann_file = root + 'test.json' # test json 정보\n",
+-    "# cfg.data.test.pipeline[1]['img_scale'] = (512,512) # Resize\n",
++    "cfg.data.test.classes = classes\n",
++    "cfg.data.test.img_prefix = root\n",
++    "cfg.data.test.ann_file = root + 'test.json' # test json 정보\n",
++    "cfg.data.test.pipeline[1]['img_scale'] = (1024,1024) # Resize\n",
+     "\n",
+-    "# cfg.data.samples_per_gpu = 4\n",
++    "cfg.data.samples_per_gpu = 4\n",
+     "\n",
+     "cfg.seed = 2021\n",
+     "cfg.gpu_ids = [0]\n",
+@@ -66,33 +92,38 @@
+     "\n",
+     "cfg.optimizer_config.grad_clip = dict(max_norm=35, norm_type=2)\n",
+     "cfg.checkpoint_config = dict(max_keep_ckpts=3, interval=1)"
+-   ]
++   ],
++   "outputs": [],
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 3,
+-   "metadata": {},
++   "source": [
++    "print(cfg.optimizer)"
++   ],
+    "outputs": [
+     {
+-     "name": "stdout",
+      "output_type": "stream",
++     "name": "stdout",
+      "text": [
+       "{'type': 'AdamW', 'lr': 0.0001, 'betas': (0.9, 0.999), 'weight_decay': 0.05, 'paramwise_cfg': {'custom_keys': {'absolute_pos_embed': {'decay_mult': 0.0}, 'relative_position_bias_table': {'decay_mult': 0.0}, 'norm': {'decay_mult': 0.0}}}}\n"
+      ]
+     }
+    ],
+-   "source": [
+-    "print(cfg.optimizer)"
+-   ]
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 4,
+-   "metadata": {},
++   "source": [
++    "# build_dataset\n",
++    "datasets = [build_dataset(cfg.data.train)]"
++   ],
+    "outputs": [
+     {
+-     "name": "stdout",
+      "output_type": "stream",
++     "name": "stdout",
+      "text": [
+       "loading annotations into memory...\n",
+       "Done (t=0.18s)\n",
+@@ -101,17 +132,18 @@
+      ]
+     }
+    ],
+-   "source": [
+-    "# build_dataset\n",
+-    "datasets = [build_dataset(cfg.data.train)]"
+-   ]
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 5,
+-   "metadata": {},
++   "source": [
++    "# dataset 확인\n",
++    "datasets[0]"
++   ],
+    "outputs": [
+     {
++     "output_type": "execute_result",
+      "data": {
+       "text/plain": [
+        "\n",
+@@ -124,24 +156,24 @@
+        "+-------------------+-------+---------------+-------+-----------------+-------+-------------+-------+--------------+-------+"
+       ]
+      },
+-     "execution_count": 5,
+      "metadata": {},
+-     "output_type": "execute_result"
++     "execution_count": 5
+     }
+    ],
+-   "source": [
+-    "# dataset 확인\n",
+-    "datasets[0]"
+-   ]
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 6,
+-   "metadata": {},
++   "source": [
++    "# 모델 build 및 pretrained network 불러오기\n",
++    "model = build_detector(cfg.model)\n",
++    "model.init_weights()"
++   ],
+    "outputs": [
+     {
+-     "name": "stderr",
+      "output_type": "stream",
++     "name": "stderr",
+      "text": [
+       "/opt/ml/detection/mmdetection/mmdet/core/anchor/builder.py:16: UserWarning: ``build_anchor_generator`` would be deprecated soon, please use ``build_prior_generator`` \n",
+       "  '``build_anchor_generator`` would be deprecated soon, please use '\n",
+@@ -1046,20 +1078,19 @@
+      ]
+     }
+    ],
+-   "source": [
+-    "# 모델 build 및 pretrained network 불러오기\n",
+-    "model = build_detector(cfg.model)\n",
+-    "model.init_weights()"
+-   ]
++   "metadata": {}
+   },
+   {
+    "cell_type": "code",
+    "execution_count": 7,
+-   "metadata": {},
++   "source": [
++    "# 모델 학습\n",
++    "train_detector(model, datasets[0], cfg, distributed=False, validate=False)"
++   ],
+    "outputs": [
+     {
+-     "name": "stderr",
+      "output_type": "stream",
++     "name": "stderr",
+      "text": [
+       "2021-09-30 03:04:15,116 - mmdet - INFO - Start running, host: root@7c777ee16d5f, work_dir: /opt/ml/detection/mmdetection/work_dirs/cascade_rcnn_x101_64x4d_swin-t-p4-w7_fpn_40epo_coco.py\n",
+       "2021-09-30 03:04:15,117 - mmdet - INFO - Hooks will be executed in the following order:\n",
+@@ -1410,17 +1441,7 @@
+      ]
+     }
+    ],
+-   "source": [
+-    "# 모델 학습\n",
+-    "train_detector(model, datasets[0], cfg, distributed=False, validate=False)"
+-   ]
+-  },
+-  {
+-   "cell_type": "code",
+-   "execution_count": null,
+-   "metadata": {},
+-   "outputs": [],
+-   "source": []
++   "metadata": {}
+   }
+  ],
+  "metadata": {
+@@ -1428,23 +1449,23 @@
+    "hash": "980dec4bdc0f65d3f181e5891661df87e8769cde5e79cd54bc145a7f830b2685"
+   },
+   "kernelspec": {
+-   "display_name": "Python 3 (ipykernel)",
++   "display_name": "detection",
+    "language": "python",
+-   "name": "python3"
++   "name": "detection"
+   },
+   "language_info": {
++   "name": "python",
++   "version": "3.7.11",
++   "mimetype": "text/x-python",
+    "codemirror_mode": {
+     "name": "ipython",
+     "version": 3
+    },
+-   "file_extension": ".py",
+-   "mimetype": "text/x-python",
+-   "name": "python",
+-   "nbconvert_exporter": "python",
+    "pygments_lexer": "ipython3",
+-   "version": "3.7.11"
++   "nbconvert_exporter": "python",
++   "file_extension": ".py"
+   }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 4
+-}
++}
+\ No newline at end of file
+diff --git a/mmdetection/tools/analysis_tools/analyze_results.py b/mmdetection/tools/analysis_tools/analyze_results.py
+index 2e8e67d..66f7bb8 100644
+--- a/mmdetection/tools/analysis_tools/analyze_results.py
++++ b/mmdetection/tools/analysis_tools/analyze_results.py
+@@ -8,6 +8,8 @@ from mmcv import Config, DictAction
+ from mmdet.core.evaluation import eval_map
+ from mmdet.core.visualization import imshow_gt_det_bboxes
+ from mmdet.datasets import build_dataset, get_loading_pipeline
++from effdet import get_efficientdet_config, EfficientDet, DetBenchTrain
++from effdet.efficientdet import HeadNet
+ 
+ 
+ def bbox_map_eval(det_result, annotation):
+@@ -139,9 +141,9 @@ def parse_args():
+         description='MMDet eval image prediction result for each')
+     parser.add_argument('config', help='test config file path')
+     parser.add_argument(
+-        'prediction_path', help='prediction path where test pkl result')
++        'prediction', help='prediction path where test pkl result')
+     parser.add_argument(
+-        'show_dir', help='directory where painted images will be saved')
++        '../../show', help='directory where painted images will be saved')
+     parser.add_argument('--show', action='store_true', help='show results')
+     parser.add_argument(
+         '--wait-time',
+@@ -186,7 +188,7 @@ def main():
+     if cfg.get('custom_imports', None):
+         from mmcv.utils import import_modules_from_strings
+         import_modules_from_strings(**cfg['custom_imports'])
+-
++    
+     cfg.data.test.pop('samples_per_gpu', 0)
+     cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.pipeline)
+     dataset = build_dataset(cfg.data.test)
