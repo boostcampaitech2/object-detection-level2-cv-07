@@ -54,3 +54,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     csvToCoco(os.path.join(os.path.dirname(os.path.realpath(__file__)),'split_valid.json'), args.csv_path)
+    print(args.csv_path)

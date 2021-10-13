@@ -32,8 +32,8 @@ def main(ground_truth_file, predict_file):
                     classId=pred['category_id'],
                     x=pred['bbox'][0],
                     y=pred['bbox'][1],
-                    w=pred['bbox'][2],
-                    h=pred['bbox'][3],
+                    w=pred['bbox'][2] - pred['bbox'][0],
+                    h=pred['bbox'][3] - pred['bbox'][1],
                     typeCoordinates=CoordinatesType.Absolute,
                     bbType=BBType.Detected,
                     classConfidence=pred['score'],
@@ -46,18 +46,26 @@ def main(ground_truth_file, predict_file):
                             IOUThreshold=0.5,
                             method=MethodAveragePrecision.EveryPointInterpolation)
     
-    mean_f1 = 0
+    mean_precision, mean_recall, mean_f1 = 0, 0, 0
     
-    print(f'{" ":16} {"class AP":6} {"TP":^6} {"FP":^6} {"Precision"}  {"Recall":6} {"F1":^6}')
-    print('-'*65)
+    print(f'{" ":21} {"class AP":6} {"TP":^6} {"FP":^6} {"Precision"}  {"Recall":6} {"F1":^6}')
+    print('-'*70)
     for ap in AP:
-        precision = ap["total TP"]/(ap["total FP"]+ap["total TP"])
+        precision = ap["total TP"]/(ap["total FP"]+ap["total TP"]) if ap["total FP"]+ap["total TP"] != 0 else 0
         recall = ap["total TP"]/ap["total positives"]
+        mean_precision += precision
+        mean_recall += recall
+        
         f1 = 2 * (precision*recall) / (precision+recall) if precision + recall != 0 else 0
-        mean_f1 += f1
-        print(f'{classes[ap["class"]]:>15}  {ap["AP"]:6.04f} {ap["total TP"]:6.0f} {ap["total FP"]:6.0f} {precision:11.4f} {recall:7.04f} {f1:7.04f}')
-    print('='*65)
-    print(f'{"Average":>15}  {" ":40} {mean_f1/len(AP):7.04f}')
+        # mean_f1 += f1
+        print(f'{classes[ap["class"]]+"("+str(ap["total positives"])+")":>20}  {ap["AP"]:6.04f} {ap["total TP"]:6.0f} {ap["total FP"]:6.0f} {precision:11.4f} {recall:7.04f} {f1:7.04f}')
+    
+    mean_precision = mean_precision/len(AP)
+    mean_recall = mean_recall/len(AP)
+    mean_f1 = 2 * (mean_precision*mean_recall) / (mean_precision+mean_recall) if mean_precision + mean_recall != 0 else 0
+        
+    print('='*70)
+    print(f'{"Average":>20}  {" ":20} {mean_precision:11.4f} {mean_recall:7.04f} {mean_f1:7.04f}')
         
     print()
         
