@@ -13,8 +13,8 @@ from mmdet.datasets import build_dataset
 
 
 # config file 들고오기
-# cfg = Config.fromfile('./DetectoRS.py')
-cfg = Config.fromfile('./DetectoRS_resnet.py')
+cfg = Config.fromfile('./DetectoRS.py')
+# cfg = Config.fromfile('./DetectoRS_resnet.py')
 # cfg = Config.fromfile('./swin_DetectoRS.py')
 
 # cfg.optimizer = dict(type='Adam', lr=0.0001, weight_decay=0.0005)
@@ -31,7 +31,7 @@ cfg.gpu_ids = [0]
 
 
 # cfg.work_dir = './work_dirs/swin_decetors'
-cfg.work_dir = './work_dirs/DetectoRS_ResNet_epoch30_grid_clip'
+cfg.work_dir = './work_dirs/DetectoRS_cyc'
 
 for bbox_head__ in cfg.model.roi_head.bbox_head:
     bbox_head__.num_classes = 10

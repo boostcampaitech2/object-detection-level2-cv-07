@@ -17,12 +17,12 @@ import numpy as np
 
 
 # config file 들고오기
-cfg = Config.fromfile('./DetectoRS.py')
-# cfg = Config.fromfile('./DetectoRS_resnet.py')
+# cfg = Config.fromfile('./DetectoRS.py')
+cfg = Config.fromfile('./DetectoRS_resnet.py')
 
 root='./dataset/'
 
-epoch = 'epoch_12'
+epoch = 'epoch_13'
 
 # cfg.optimizer = dict(type='Adam', lr=0.0001, weight_decay=0.0005)
 
@@ -30,8 +30,8 @@ epoch = 'epoch_12'
 cfg.seed=2021
 cfg.gpu_ids = [0]
 # cfg.work_dir = './work_dirs/DetectoRS_ResNet_AdamW'
-cfg.work_dir = './work_dirs/adam_resnext'
- 
+cfg.work_dir = './work_dirs/DetectoRS_ResNet_epoch30_grid_clip'
+
 for bbox_head__ in cfg.model.roi_head.bbox_head:
     bbox_head__.num_classes = 10
 

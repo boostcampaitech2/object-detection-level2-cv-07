@@ -108,8 +108,10 @@ data = dict(
         classes = classes_list,
         img_prefix=data_root,
         pipeline=test_pipeline))
-evaluation = dict(interval=1, metric='bbox')
-
+evaluation = dict(
+    interval=1,
+    metric='bbox',
+    save_best='bbox_mAP_50')
 
 ########################################################################
 ########################   Scedules setting   ##########################
@@ -155,7 +157,7 @@ log_config = dict(
         dict(type='WandbLoggerHook',
         init_kwargs=dict(
             project='DetectoRS',
-            name='DetectoRS_ResNet_epoch30_grid_clip'))
+            name='DetectoRS_ResNet_recru3'))
     ])
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]
