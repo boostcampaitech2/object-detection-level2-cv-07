@@ -73,6 +73,6 @@ def main(ground_truth_file, predict_file):
     
 if __name__ == '__main__':
     main(
-        ground_truth_file = './data/split_valid.json',
+        ground_truth_file = '/opt/ml/detection/dataset/split_valid.json',
         predict_file = './data/predict_valid.json'
     )

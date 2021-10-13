@@ -14,8 +14,17 @@ object-detection-level2-cv-07/tool/class_AP_evaluation
 └── utils.py
 ```
 ## How to use
+- Excute in current directory (```class_AP_evaluation```)
 ```bash
 sh run.sh
+```
+- Can change csv file path ```run.sh```
+```python
+cd data && python csv_to_coco.py --csv_path '<file path>'
+```
+- If want to save log
+```bash
+sh run.sh >> '<txt file name>'
 ```
 
 ## [Citation](https://github.com/rafaelpadilla/Object-Detection-Metrics)
