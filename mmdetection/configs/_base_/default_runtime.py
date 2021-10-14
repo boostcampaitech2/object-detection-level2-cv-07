@@ -4,6 +4,10 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
+        dict(type='WandbLoggerHook',
+        init_kwargs=dict(
+            project='recycle',
+            name='ddeokbboki-good'))
         # dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
