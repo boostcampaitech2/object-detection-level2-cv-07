@@ -31,7 +31,7 @@ cfg.gpu_ids = [0]
 
 
 # cfg.work_dir = './work_dirs/swin_decetors'
-cfg.work_dir = './work_dirs/DetectoRS_cyc'
+cfg.work_dir = './work_dirs/DetectoRS_cyc_aug'
 
 for bbox_head__ in cfg.model.roi_head.bbox_head:
     bbox_head__.num_classes = 10
@@ -41,7 +41,7 @@ cfg.optimizer_config.grad_clip = dict(max_norm=35, norm_type=2)
 # build_dataset
 datasets = [build_dataset(cfg.data.train),build_dataset(cfg.data.val_loss)]
 
-# 모델 build 및 pretrained network 불러오기
+# 모델 build 및 pretrained network 불러오기x
 model = build_detector(cfg.model)
 model.init_weights()
 

@@ -47,12 +47,15 @@ data_root = './dataset/'
 classes_list =  ("General trash", "Paper", "Paper pack",
                     "Metal", "Glass", "Plastic", "Styrofoam",
                     "Plastic bag", "Battery", "Clothing")
+# img_norm_cfg = dict(
+#     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+    mean=[123.650, 117.397, 110.075], std=[54.034, 53.369, 54.783], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
+    # dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
+    dict(type='Resize', img_scale=[(1024, 1024), (2048, 2048)], keep_ratio=True),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
@@ -82,8 +85,8 @@ test_pipeline = [
         ]),
 ]
 data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=2,
+    samples_per_gpu=1,
+    workers_per_gpu=1,
     train=dict(
         type=dataset_type,
         ann_file=data_root + 'split_train.json',
@@ -141,8 +144,8 @@ optimizer_config = dict(grad_clip=None)
 #     step=[8, 11])
 lr_config = dict(
     policy='cyclic',
-    target_ratio=(1e-3, 1e-5),
-    cyclic_times=1,
+    target_ratio=(1e-3, 1e-6),
+    cyclic_times=3,
     step_ratio_up=0.4,
 )
 momentum_config = dict(
@@ -171,7 +174,7 @@ log_config = dict(
         dict(type='WandbLoggerHook',
         init_kwargs=dict(
             project='DetectoRS',
-            name='DetectoRS_DetectoRS_cyc'))
+            name='DetectoRS_cyc_aug'))
     ])
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]
