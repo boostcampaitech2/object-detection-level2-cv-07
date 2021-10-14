@@ -26,6 +26,14 @@ cd data && python csv_to_coco.py --csv_path '<file path>'
 ```bash
 sh run.sh >> '<txt file name>'
 ```
+- Excute small object evaluation
+```bash
+sh run-small-obj.sh
+```
+- Change small object size (area range) ```main-small-object.py```
+```python
+small_size = (0, 10000)
+```
 ### Result
 ```
 retina_resnet101_epoch_17.csv
