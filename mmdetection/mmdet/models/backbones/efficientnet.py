@@ -75,4 +75,8 @@ class EfficientNet(nn.Module):
             for m in self.modules():
                 # trick: eval have effect on BatchNorm only
                 if isinstance(m, _BatchNorm):
+<<<<<<< HEAD
                     m.eval()
+=======
+                    m.eval()
+>>>>>>> c29428eb4a1376fd21893e574adf30428ca9650a

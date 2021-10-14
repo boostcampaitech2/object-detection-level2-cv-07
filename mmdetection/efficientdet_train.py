@@ -21,7 +21,7 @@ classes = ("General trash", "Paper", "Paper pack", "Metal", "Glass",
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing")
 
 # config file 들고오기
-cfg = Config.fromfile('./configs/efficientdet/efficientdet_d4_bifpn_1x.py')
+cfg = Config.fromfile('./configs/cbnet/efficientdet_d4_bifpn_1x.py')
 
 root='../dataset/'
 

@@ -1,0 +1,28 @@
+{
+    "os": "Linux-4.4.0-59-generic-x86_64-with-debian-buster-sid",
+    "python": "3.7.11",
+    "heartbeatAt": "2021-10-03T12:41:29.580971",
+    "startedAt": "2021-10-03T12:41:28.397384",
+    "docker": null,
+    "gpu": "Tesla V100-PCIE-32GB",
+    "gpu_count": 1,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [
+        "EfficientDet_train.py",
+        "../work_dir/EfficientDet_d3/epoch_49.pth",
+        "--show"
+    ],
+    "state": "running",
+    "program": "./tools/test.py",
+    "codePath": "mmdetection/tools/test.py",
+    "git": {
+        "remote": "https://github.com/boostcampaitech2/object-detection-level2-cv-07.git",
+        "commit": "dc2d0fc580253371b1e506116440cf16c3f885dc"
+    },
+    "email": null,
+    "root": "/opt/ml/object-detection-level2-cv-07",
+    "host": "e5ac52e6a4ad",
+    "username": "root",
+    "executable": "/opt/conda/envs/detection/bin/python"
+}

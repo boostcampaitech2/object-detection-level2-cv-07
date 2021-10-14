@@ -1,16 +1,9 @@
-_base_ = [
-    '../_base_/datasets/coco_detection.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
-]
-
 # model settings
 model = dict(
     type='RetinaNet',
     backbone=dict(
         type='EfficientNet',
-        model_name='efficientnet_b4',
-        out_indices=(2, 3, 4, 5, 6)
-        ),
+        model_name='tf_efficientnet_b4'),
     neck=dict(
         type='BIFPN',
         in_channels=[56, 112, 160, 272, 448],
@@ -116,5 +109,29 @@ lr_config = dict(
     warmup_ratio=1.0 / 3,
     step=[8, 11])
 
+<<<<<<< HEAD
 # runtime settings
 runner = dict(type='EpochBasedRunner', max_epochs=12)
+=======
+checkpoint_config = dict(interval=1)
+# yapf:disable
+log_config = dict(
+    interval=50,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        # dict(type='TensorboardLoggerHook')
+        dict(type='WandbLoggerHook',
+        init_kwargs=dict(
+            project='recycle',
+            name='ddeokbboki-good'))
+# yapf:enable
+custom_hooks = [dict(type='NumClassCheckHook')]
+# runtime settings
+total_epochs = 12
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+work_dir = './work_dirs/efficient_d4_bifpn_1x'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+>>>>>>> c29428eb4a1376fd21893e574adf30428ca9650a
