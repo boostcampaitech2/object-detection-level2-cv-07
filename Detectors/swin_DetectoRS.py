@@ -1,0 +1,229 @@
+########################################################################
+########################   backbone setting   ##########################
+########################################################################
+_base_ = [
+    './backbone/cascade_rcnn_r50_fpn.py',
+]
+
+########################################################################
+#########################   Model setting   ############################
+########################################################################
+
+pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'  # noqa
+
+# model = dict(
+#     backbone=dict(
+#         _delete_=True,
+#         type='SwinTransformer',
+#         embed_dims=96,
+#         depths=[2, 2, 6, 2],
+#         num_heads=[3, 6, 12, 24],
+#         window_size=7,
+#         mlp_ratio=4,
+#         qkv_bias=True,
+#         qk_scale=None,
+#         drop_rate=0.,
+#         attn_drop_rate=0.,
+#         drop_path_rate=0.2,
+#         patch_norm=True,
+#         out_indices=(0, 1, 2, 3),
+#         with_cp=False,
+#         convert_weights=True,
+#         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
+#     neck=dict(
+#         type='RFP',
+#         rfp_steps=2,
+#         aspp_out_channels=64,
+#         aspp_dilations=(1, 3, 6, 1),
+#         rfp_backbone=dict(
+#             # rfp_inplanes=256,
+#             type='SwinTransformer',
+#             embed_dims=96,
+#             depths=[2, 2, 6, 2],
+#             num_heads=[3, 6, 12, 24],
+#             window_size=7,
+#             mlp_ratio=4,
+#             qkv_bias=True,
+#             qk_scale=None,
+#             drop_rate=0.,
+#             attn_drop_rate=0.,
+#             drop_path_rate=0.2,
+#             patch_norm=True,
+#             out_indices=(0, 1, 2, 3),
+#             with_cp=False,
+#             convert_weights=True,
+#             init_cfg=dict(type='Pretrained', checkpoint=pretrained))))
+
+model = dict(
+    type='CascadeRCNN',
+    backbone=dict(
+        _delete_=True,
+        type='SwinTransformer',
+        embed_dims=96,
+        depths=[2, 2, 6, 2],
+        num_heads=[3, 6, 12, 24],
+        window_size=7,
+        mlp_ratio=4,
+        qkv_bias=True,
+        qk_scale=None,
+        drop_rate=0.,
+        attn_drop_rate=0.,
+        drop_path_rate=0.2,
+        patch_norm=True,
+        out_indices=(0, 1, 2, 3),
+        with_cp=False,
+        convert_weights=True,
+        init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
+    neck=dict(
+        type='RFP',
+        rfp_steps=2,
+        aspp_out_channels=64,
+        aspp_dilations=(1, 3, 6, 1),
+        rfp_backbone=dict(
+            rfp_inplanes=256,
+            type='SwinTransformer',
+            embed_dims=96,
+            depths=[2, 2, 6, 2],
+            num_heads=[3, 6, 12, 24],
+            window_size=7,
+            mlp_ratio=4,
+            qkv_bias=True,
+            qk_scale=None,
+            drop_rate=0.,
+            attn_drop_rate=0.,
+            drop_path_rate=0.2,
+            patch_norm=True,
+            out_indices=(0, 1, 2, 3),
+            with_cp=False,
+            convert_weights=True,
+            init_cfg=dict(type='Pretrained', checkpoint=pretrained))))
+
+########################################################################
+########################   DataSet setting   ###########################
+########################################################################
+# dataset settings
+dataset_type = 'CocoDataset'
+# data_root = 'data/coco/'
+data_root = './dataset/'
+classes_list =  ("General trash", "Paper", "Paper pack",
+                    "Metal", "Glass", "Plastic", "Styrofoam",
+                    "Plastic bag", "Battery", "Clothing")
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
+]
+valid_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.0),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(1024, 1024),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(type='Normalize', **img_norm_cfg),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img']),
+        ]),
+]
+data = dict(
+    samples_per_gpu=4,
+    workers_per_gpu=2,
+    train=dict(
+        type=dataset_type,
+        ann_file=data_root + 'split_train.json',
+        classes = classes_list,
+        img_prefix=data_root,
+        pipeline=train_pipeline),
+    val=dict(
+        type=dataset_type,
+        ann_file=data_root + 'split_valid.json',
+        classes = classes_list,
+        img_prefix=data_root,
+        pipeline=test_pipeline),
+    val_loss=dict(
+        type=dataset_type,
+        ann_file=data_root + 'split_valid.json',
+        classes = classes_list,
+        img_prefix=data_root,
+        pipeline=valid_pipeline),
+    test=dict(
+        test_mode = True,
+        type=dataset_type,
+        ann_file=data_root + 'test.json',
+        classes = classes_list,
+        img_prefix=data_root,
+        pipeline=test_pipeline))
+evaluation = dict(interval=1, metric='bbox')
+
+
+########################################################################
+########################   Scedules setting   ##########################
+########################################################################
+
+# optimizer
+optimizer = dict(
+    type='AdamW',
+    lr=0.0001,
+    betas=(0.9, 0.999),
+    weight_decay=0.05,
+    paramwise_cfg=dict(
+        custom_keys={
+            'absolute_pos_embed': dict(decay_mult=0.),
+            'relative_position_bias_table': dict(decay_mult=0.),
+            'norm': dict(decay_mult=0.)
+        }))
+
+optimizer_config = dict(grad_clip=None)
+# learning policy
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[8, 11])
+
+runner = dict(type='EpochBasedRunner', max_epochs=24)
+
+########################################################################
+########################   Runtime setting   ###########################
+########################################################################
+
+checkpoint_config = dict(interval=1, max_keep_ckpts=24)
+# yapf:disable
+log_config = dict(
+    interval=50,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        # dict(type='TensorboardLoggerHook')
+        # dict(type='WandbLoggerHook',
+        #     init_kwargs=dict(
+        #         project='Swin_detectors',
+        #         name='default'))
+    ])
+
+    
+# yapf:enable
+custom_hooks = [dict(type='NumClassCheckHook')]
+
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1), ('val', 1)]
