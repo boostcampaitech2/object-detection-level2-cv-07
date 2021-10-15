@@ -20,9 +20,12 @@ image-classification-level1-02/
 │   ├── test/  (4871 images)
 │   ├── train.json
 │   └── test.json
-├── tool/
+├── mmdetection/
+│   ├── configs/
+│   ├── mmdetection library files
+│   ├── cascade_swin.train
+│   └── 
 └── util/
-(추후 업데이트 예정)
 ```
 
 - ```dataset/``` : download from [https://stages.ai/](https://stages.ai/)
@@ -44,20 +47,10 @@ Install packages :  `pip install -r requirements.txt`
 
 ## Ensemble Models
 
-| Model CSV Name            | Description                           |
+| Model / Architecture      | Description                           |
 | ------------------------- | ------------------------------------- |
-| detecto_resnet            | - Model: <br/> - Backbone: <br/> - mAP: |
-| detectRS_0.538            | - Model: <br/> - Backbone: <br/> - mAP: |
-| detectRS_gradclip_resnet  | - Model: <br/> - Backbone: <br/> - mAP: |
-| efficientD4               | - Model: <br/> - Backbone: <br/> - mAP: |
-| Hscore_swin_19_only_low_propos| - Model: <br/> - Backbone: <br/> - mAP: |
-| pvt_b3_14epoch            | - Model: <br/> - Backbone: <br/> - mAP: |
-| pvt_seryung               | - Model: RetinaNet <br/> - Backbone: PVT <br/> - mAP: 0.517 |
-| swin_0.559                | - Model: <br/> - Backbone: <br/> - mAP: |
-| swin_epo_21_PA_smallAnchor| - Model: <br/> - Backbone: <br/> - mAP: |
-| swinSGD                   | - Model: <br/> - Backbone: <br/> - mAP: |
-| univ101_24                | - Model: <br/> - Backbone: <br/> - mAP: |
-| Hscore_PAFPN_2048_small   | - Model: <br/> - Backbone: <br/> - mAP: |
+| detectoRS                 |                                       |
+
 
 ## Contributors
 
