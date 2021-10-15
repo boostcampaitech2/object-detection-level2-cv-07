@@ -23,8 +23,8 @@ image-classification-level1-02/
 ├── mmdetection/
 │   ├── configs/
 │   ├── mmdetection library files
-│   ├── cascade_swin.train
-│   └── 
+│   ├── train.py
+│   └── inference.py
 └── util/
 ```
 
