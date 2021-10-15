@@ -45,12 +45,6 @@ Install packages :  `pip install -r requirements.txt`
 - GPU: V100
 - RAM: 88GB
 
-## Ensemble Models
-
-| Model / Architecture      | Description                           |
-| ------------------------- | ------------------------------------- |
-| detectoRS                 |                                       |
-
 
 ## Contributors
 
