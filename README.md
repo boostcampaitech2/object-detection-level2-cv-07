@@ -30,6 +30,28 @@ image-classification-level1-02/
 
 - ```dataset/``` : download from [https://stages.ai/](https://stages.ai/)
 
+## get start
+
+### train & inference
+```
+cd mmdetection
+
+python train.py
+python inference.py
+```
+
+### visualize
+```
+cd util
+
+jupyter notebook Visualize.ipynb
+
+set result csv in second shell
+```
+it also has Visualize_val_gt -> Visualize ground truth of train data & valid
+
+it also has Visualize_val -> Visualize result of valid
+
 ### Requirements
 
 - Ubuntu 18.04.5
